@@ -1,0 +1,4 @@
+openai
+PyYAML
+python-dotenv
+streamlit
