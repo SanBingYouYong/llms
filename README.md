@@ -1,10 +1,10 @@
 # *Personal* Simple & Re-usable LLMs Helper Library for Querying and Visualization
 
+`git submodule add -b slim https://github.com/SanBingYouYong/llms` or `git submodule set-branch -b slim llms` if you already added it.
+
 `llms.py`: provides an `LLMHelper` class, concerned modalities: text, images
 
 `visualize_chat_history.py`: uses [streamlit](https://streamlit.io/) to visualize chat histories (run with `streamlit run visualize_chat_history.py`)
-
-![Interface showcase](ui_showcase.png)
 
 Import with `from llms import helper` for single instance, or import the `LLMHelper` class directly.
 
