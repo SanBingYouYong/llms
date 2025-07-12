@@ -8,6 +8,8 @@
 
 Import with `from llms import helper` for single instance, or import the `LLMHelper` class directly.
 
+Use the `slim` branch to add only necessary files as a git submodule: `git submodule add -b slim https://github.com/SanBingYouYong/llms`
+
 API keys loaded through `.env`
 
 ```
