@@ -33,7 +33,7 @@ Dependencies (`requirements.txt`): openai, PyYAML, python-dotenv, streamlit (opt
 
 ## Features
 
-- provider and model config verification, vision/thinking  early stop
+- provider and model config verification, vision/thinking capability checks with early stop
 - exponential back-off for rate limits
 - saved history contains extra information: query timestamp, provider and model used, and absolute paths of images attached (in addition to role and content, as content only contains base64 of images)
 
@@ -47,7 +47,6 @@ helper.query(
     history_messages,  # a list of api compatible chat messages, may contain system prompt messages, compatible chat format (role and content)
     user_prompt,  # current query
     image_paths,  # absolute paths to image files to be attached
-    thinking,  # whether to enable reasoning mode
     streamed,  # whether to use stream mode
     return_stream_generator,  # when request is streamed, whether to return a generator instance or to return combined (all of received) chunks of LLM response
     print_to_console,  # whether to print received LLM response to terminal/console
@@ -62,7 +61,7 @@ helper.chat_session(
     provider, model, 
     session_id,  # un-suffixed name of the chat history json file
     user_prompt,  # current query
-    image_paths, thinking, streamed, return_stream_generator, print_to_console,  # note the absence of save_path
+    image_paths, streamed, return_stream_generator, print_to_console,  # note the absence of save_path
     **kwargs
 )  # returns string or a generator that yields string
 ```
@@ -82,7 +81,7 @@ helper.duplicate_session(
 
 ## Notes
 
-vision and thinking flags are indicative of model capability, not config. pass args like reasoning effort as kwargs if needed - note that the current implementation uses the chat completions api, not the response api so reasoning options may be limited. code is not tested with thinking control but shown to work with thinking-enabled models. 
+vision and thinking flags are indicative of model capability, not config. pass args like reasoning effort as kwargs if needed - note that the current implementation uses the chat completions api, not the response api so reasoning options may be limited. code is not tested with thinking control parameters in the API call but shown to work with thinking-enabled models. 
 
 ## Fun Fact
 

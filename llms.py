@@ -57,7 +57,7 @@ class LLMHelper:
         return self._clients[provider]
 
     def _verify_model_config(
-        self, provider: str, model: str, image_paths: List[str], thinking: bool
+        self, provider: str, model: str, image_paths: List[str]
     ):
         """
         Verifies the provider and model configurations.
@@ -66,7 +66,6 @@ class LLMHelper:
             provider: The name of the API provider.
             model: The alias of the model.
             image_paths: A list of absolute paths to image files.
-            thinking: Whether to enable reasoning mode.
 
         Raises:
             ValueError: If the provider, model, or configuration is invalid.
@@ -81,8 +80,6 @@ class LLMHelper:
         model_config = self.config[provider]["models"][model]
         if image_paths and not model_config.get("vision", False):
             raise ValueError(f"Model '{model}' does not support vision.")
-        if thinking and not model_config.get("thinking", False):
-            raise ValueError(f"Model '{model}' does not support thinking mode.")
 
     @staticmethod
     def _encode_image(image_path: str) -> str:
@@ -161,10 +158,9 @@ class LLMHelper:
         self,
         provider: str,
         model: str,
-        history_messages: List[Dict[str, Any]],
         user_prompt: str,
+        history_messages: List[Dict[str, Any]] = [],
         image_paths: Optional[List[str]] = None,
-        thinking: bool = False,
         streamed: bool = False,
         return_stream_generator: bool = False,
         print_to_console: bool = False,
@@ -177,10 +173,9 @@ class LLMHelper:
         Args:
             provider: The name of the API provider.
             model: The alias of the model.
-            history_messages: A list of previous chat messages.
             user_prompt: The current user query.
+            history_messages: A list of previous chat messages.
             image_paths: A list of absolute paths to image files.
-            thinking: Whether to enable reasoning mode.
             streamed: Whether to use stream mode.
             return_stream_generator: If streamed, return a generator.
             print_to_console: Whether to print the response to the console.
@@ -191,13 +186,13 @@ class LLMHelper:
             The LLM's response as a string or a generator.
         """
         image_paths = image_paths or []
-        self._verify_model_config(provider, model, image_paths, thinking)
+        self._verify_model_config(provider, model, image_paths)
 
         model_config = self.config[provider]["models"][model]
         api_model_name = model_config["model"]
         final_kwargs = model_config.copy()
         final_kwargs.update(kwargs)
-        # Clean up config keys that are not part of the API call
+        # Clean up config keys that are not part of the API call and are just model capability indicators
         for key in ["model", "vision", "thinking"]:
             final_kwargs.pop(key, None)
 
@@ -325,7 +320,6 @@ class LLMHelper:
         session_id: str,
         user_prompt: str,
         image_paths: Optional[List[str]] = None,
-        thinking: bool = False,
         streamed: bool = False,
         return_stream_generator: bool = False,
         print_to_console: bool = False,
@@ -340,7 +334,6 @@ class LLMHelper:
             session_id: The un-suffixed name of the chat history file.
             user_prompt: The current user query.
             image_paths: A list of absolute paths to image files.
-            thinking: Whether to enable reasoning mode.
             streamed: Whether to use stream mode.
             return_stream_generator: If streamed, return a generator.
             print_to_console: Whether to print the response to the console.
@@ -357,7 +350,6 @@ class LLMHelper:
             history_messages=history_messages,
             user_prompt=user_prompt,
             image_paths=image_paths,
-            thinking=thinking,
             streamed=streamed,
             return_stream_generator=return_stream_generator,
             print_to_console=print_to_console,
