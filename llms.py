@@ -98,6 +98,37 @@ class LLMHelper:
         except FileNotFoundError:
             raise FileNotFoundError(f"Image file not found at: {image_path}")
 
+    def _trim_and_convert_image_paths_to_urls(self, history_messages: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """
+        Converts image paths in history messages to image URLs with base64 encoded images. Also leaves only role and content keys for API compatibility.
+
+        Args:
+            history_messages: A list of previous chat messages.
+
+        Returns:
+            A list of messages with image paths converted to image URLs.
+        """
+        converted_messages = []
+        for msg in history_messages:
+            if "role" in msg and "content" in msg:
+                if msg.get("role") == "user" and isinstance(msg.get("content"), list):
+                    converted_content = []
+                    for item in msg["content"]:
+                        if item.get("type") == "image_path" and "path" in item:
+                            base64_image = self._encode_image(item["path"])
+                            converted_content.append(
+                                {
+                                    "type": "image_url",
+                                    "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"},
+                                }
+                            )
+                        else:
+                            converted_content.append(item)
+                    converted_messages.append({"role": "user", "content": converted_content})
+                else:
+                    converted_messages.append({"role": msg["role"], "content": msg["content"]})
+        return converted_messages
+
     def _prepare_messages(
         self,
         history_messages: List[Dict[str, Any]],
@@ -115,7 +146,7 @@ class LLMHelper:
         Returns:
             The formatted list of messages for the API.
         """
-        messages = deepcopy(history_messages)
+        messages = self._trim_and_convert_image_paths_to_urls(history_messages)
         content = [{"type": "text", "text": user_prompt}]
         if image_paths:
             for path in image_paths:
@@ -342,7 +373,7 @@ class LLMHelper:
         Returns:
             The LLM's response as a string or a generator.
         """
-        history_messages = self.load_history(session_id, as_history_messages=True)
+        history_messages = self.load_history(session_id, as_history_messages=False)  # we maintain a path-based image, and the query method will use the _prepare mesasges method to encode them
 
         return self.query(
             provider=provider,
@@ -377,42 +408,10 @@ class LLMHelper:
         with open(filepath, "r") as f:
             full_history = json.load(f)
 
-        if not as_history_messages:
-            return full_history
+        if as_history_messages:
+            return self._trim_and_convert_image_paths_to_urls(full_history)
 
-        # Convert to the 'role' and 'content' format for the API
-        api_history = []
-        for msg in full_history:
-            role = msg.get("role")
-            content = msg.get("content")
-            if role and content:
-                # If user message has our custom format, convert it for the API
-                if role == "user" and isinstance(content, list):
-                    api_content = []
-                    text_parts = [
-                        item["text"] for item in content if item["type"] == "text"
-                    ]
-                    # The API expects a single text block
-                    if text_parts:
-                        api_content.append({"type": "text", "text": "\n".join(text_parts)})
-                    
-                    # Add images by encoding them
-                    image_paths = [
-                        item["path"] for item in content if item["type"] == "image_path"
-                    ]
-                    for path in image_paths:
-                         base64_image = self._encode_image(path)
-                         api_content.append(
-                             {
-                                "type": "image_url",
-                                "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"},
-                             }
-                         )
-                    api_history.append({"role": "user", "content": api_content})
-                else: # Assistant messages or simple user messages
-                    api_history.append({"role": role, "content": content})
-
-        return api_history
+        return full_history
 
     def duplicate_session(self, session_id: str, copy_id: str):
         """
