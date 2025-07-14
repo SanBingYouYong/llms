@@ -433,6 +433,37 @@ class LLMHelper:
         shutil.copy(source_path, dest_path)
         print(f"Session '{session_id}' duplicated to '{copy_id}'.")
 
+    def extract_code_block(response: str, tag: str) -> str:
+        """
+        Extracts a markdown code block (first found) marked with the specified tag from an LLM response.
+
+        Args:
+            response (str): The LLM response containing a markdown code block.
+            tag (str): The tag marking the code block (e.g., 'jsonl', 'python', 'json').
+
+        Returns:
+            str: The extracted content.
+
+        Raises:
+            ValueError: If no valid code block is found.
+        """
+        lines = response.splitlines()
+        start, end = None, None
+
+        # Find the start and end of the code block
+        for i, line in enumerate(lines):
+            if line.strip() == f"```{tag}":
+                start = i + 1
+            elif line.strip() == "```" and start is not None:
+                end = i
+                break
+
+        if start is None or end is None:
+            raise ValueError(f"No {tag} markdown code block found in the response.")
+
+        code_block = lines[start:end]
+        return "\n".join(code_block)
+
 helper = LLMHelper()  # for instance import
 
 # --- Example Usage ---
