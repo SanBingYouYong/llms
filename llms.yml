@@ -79,3 +79,8 @@ ollama:
       temperature: 0.5
       vision: false
       thinking: false
+    qwen3:0.6b:
+      model: qwen3:0.6b
+      temperature: 0.5
+      vision: false
+      thinking: true

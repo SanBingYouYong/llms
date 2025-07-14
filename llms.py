@@ -433,6 +433,7 @@ class LLMHelper:
         shutil.copy(source_path, dest_path)
         print(f"Session '{session_id}' duplicated to '{copy_id}'.")
 
+    @staticmethod
     def extract_code_block(response: str, tag: str) -> str:
         """
         Extracts a markdown code block (first found) marked with the specified tag from an LLM response.
@@ -496,8 +497,6 @@ if __name__ == "__main__":
     print("--- LLM Helper Library Demo ---")
 
     try:
-        test_helper = LLMHelper()
-
         print("Please comment out test queries you wish to run and make sure you have API keys set up for corresponding providers!")
 
         # --- Use Case 1: Basic Query ---
