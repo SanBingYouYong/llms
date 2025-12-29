@@ -1,3 +1,5 @@
+> try the new [llms2](https://github.com/SanBingYouYong/llms2) with simplicity in mind and as a python package! 
+
 # *Personal* Simple & Re-usable LLMs Helper Library for Querying and Visualization
 
 `llms.py`: provides an `LLMHelper` class, concerned modalities: text, images
